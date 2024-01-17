@@ -33,6 +33,8 @@ using System.Diagnostics.CodeAnalysis;
 #if HAVE_DYNAMIC
 using System.Dynamic;
 using System.Linq.Expressions;
+using System.ComponentModel;
+
 #endif
 #if HAVE_BIG_INTEGER
 using System.Numerics;
@@ -43,11 +45,15 @@ namespace Newtonsoft.Json.Linq
     /// <summary>
     /// Represents a value in JSON (string, integer, date, etc).
     /// </summary>
-    public partial class JValue : JToken, IEquatable<JValue>, IFormattable, IComparable, IComparable<JValue>
+    public partial class JValue : JToken, IEquatable<JValue>, IFormattable, IComparable, IComparable<JValue>, INotifyPropertyChanged
 #if HAVE_ICONVERTIBLE
         , IConvertible
 #endif
     {
+        public event PropertyChangedEventHandler PropertyChanged;
+        protected void OnPropertyChanged([CallerMemberName] string propertyName = null) =>
+                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+
         private JTokenType _valueType;
         private object? _value;
 
@@ -719,6 +725,8 @@ namespace Newtonsoft.Json.Linq
                 }
 
                 _value = value;
+
+                OnPropertyChanged(nameof(Value));
             }
         }
 
